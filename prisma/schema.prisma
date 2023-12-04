@@ -1,3 +1,4 @@
+// Define the database connection configuration
 datasource db {
   provider     = "mysql"
   url          = env("DATABASE_URL")
@@ -8,17 +9,17 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// Models
+// Define data models for the database
 model Profile {
-  id String @id @default(uuid())
-  userId String @unique // from clerk
+  id String @id @default(uuid()) // Unique identifier for the profile (UUID)
+  userId String @unique // Unique user ID from clerk
   name String
   imageUrl String @db.Text
   email String @db.Text
 
-  servers Server[] // one to many relationship
-  members Member[] // one to many relationship
-  channels Channel[] // one to many relationship
+  servers Server[] // One-to-many relationship with servers
+  members Member[] // One-to-many relationship with members
+  channels Channel[] // One-to-many relationship with channels
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -30,10 +31,15 @@ model Server{
   imageUrl String @db.Text
   inviteCode String @db.Text
 
-  profileId String
-  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade) // foreign key
+  profileId String // Foreign key linking to Profile
 
-  members Member[] // one to many relationship
+  // This @relation directive defines a foreign key relationship between the 'Profile' and 'Server' models.
+  // - fields: [profileId] specifies that the 'profileId' field in the 'Server' model is the foreign key.
+  // - references: [id] indicates that the foreign key references the 'id' field in the 'Profile' model.
+  // - onDelete: Cascade ensures that if a 'Profile' is deleted, all associated 'Server' records are also deleted.
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  members Member[] // One-to-many relationship with members
   channels Channel[] 
 
   createdAt DateTime @default(now())
@@ -53,11 +59,11 @@ model Member{
   id String @id @default(uuid())
   role MemberRole @default(GUEST)
 
-  profileId String
-  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade) // foreign key
+  profileId String  // Foreign key linking to Profile
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   serverId String
-  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade) // foreign key
+  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
